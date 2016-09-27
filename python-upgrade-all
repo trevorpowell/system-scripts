@@ -1,0 +1,54 @@
+#!/bin/bash
+
+# Script to upgrade Python in all pyenv virtualenvs
+
+newVersion=`pyenv install --list | egrep "^\s*[0-9]*\.[0-9]*(\.[0-9]*)?$" | tail -1 | xargs`
+oldVersions=()
+packageListPathPrefix="$HOME/Google Drive/System/Package Lists/python-"
+packageListPathSuffix=".txt"
+forceReinstall="false"
+
+# Force reinstall will rebuild virtualenvs even if they use the latest Python
+if [ "$1" == "--force-reinstall" ]; then
+    forceReinstall="true"
+fi
+
+# Switch pyenv to system Python
+pyenv global system
+
+# Install latest Python
+echo "Installing latest Python version..."
+pyenv install "$newVersion" --skip-existing
+
+# Rebuild Pyenv virtualenvs
+for virtualenv in `pyenv virtualenvs --bare --skip-aliases`; do
+    virtualenvVersion=${virtualenv%%/*}
+    virtualenvName=${virtualenv##*/}
+    if [ "$virtualenvVersion" != "$newVersion" ] || [ "$forceReinstall" == "true" ]; then
+        echo "Rebuilding "$virtualenvName"..."
+        if [ "$virtualenvVersion" != "$newVersion" ] && [[ ! " ${oldVersions[@]} " =~ " $virtualenvVersion " ]]; then
+            oldVersions+=("$virtualenvVersion")
+        fi
+        echo "Removing "$virtualenvName"..."
+        pyenv uninstall --force "$virtualenv"
+        echo "Recreating "$virtualenvName"..."
+        pyenv virtualenv "$newVersion" "$virtualenvName"
+        pyenv global "$virtualenvName"
+        echo "Upgrading base packages..."
+        pip-upgrade
+        packageListPath="${packageListPathPrefix}${virtualenvName}${packageListPathSuffix}"
+        if [ -f "$packageListPath" ]; then
+            echo "Reinstalling packages for "$virtualenvName" from "$packageListPath"..."
+            pip install -r "$packageListPath"
+        fi
+    fi
+done
+
+# Switch pyenv to system Python
+pyenv global system
+
+# Uninstall old Python versions
+for version in "${oldVersions[@]}"; do
+    echo "Uninstalling "$version"..."
+    pyenv uninstall --force "$version"
+done

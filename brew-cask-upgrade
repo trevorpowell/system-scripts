@@ -1,0 +1,36 @@
+#!/bin/bash
+
+# Script to upgrade all Homebrew Cask packages and cleanup old versions
+
+baseDir="/usr/local/Caskroom"
+metadataDir=".metadata"
+
+# Loop over all installed casks
+for package in `brew cask list`; do
+
+    # Get latest version of cask
+    packageVersionSearch="$package: "
+    packageVersionLine=`brew cask info $package | grep $packageVersionSearch`
+    packageVersion=${packageVersionLine#$packageVersionSearch}
+
+    # If latest version is not installed then install it
+    cd "$baseDir/$package"
+    if [ ! -d "$packageVersion" ]; then
+        brew cask install --force "$package"
+    fi
+
+    # Remove old version folders and files from the cask directory
+    for folder in */; do
+        if [ "$folder" != "$packageVersion/" ]; then
+            rm -rf "$folder"
+        fi
+    done
+
+    # Remove old version folders and files from the cask metadata directory
+    cd "$baseDir/$package/$metadataDir"
+    for folder in */; do
+        if [ "$folder" != "$packageVersion/" ]; then
+            rm -rf "$folder"
+        fi
+    done
+done

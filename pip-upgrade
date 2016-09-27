@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# Script to upgrade Python packages in current Python environment
+
+# Upgrade outdated Python packages
+for package in `pip list --outdated | awk '{ print $1 }'`; do
+    pip install --upgrade "$package"
+done

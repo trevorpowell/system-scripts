@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Script to upgrade Python packages in all pyenv versions and virtualenvs
+
+# Upgrade system Python version
+pyenv global system
+echo "Upgrading system..."
+pip-upgrade
+
+# Upgrade pyenv Python versions
+for version in `pyenv versions --bare --skip-aliases`; do
+    pyenv global "$version"
+    echo "Upgrading $version..."
+    pip-upgrade
+done
+
+# Switch to system Python version
+pyenv global system
