@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# Script to run Apache HTTP Server out of any folder on any port
+# Example:
+# apache start 8080
+# apache stop 8080
+
+localPath=`pwd`
+
+if [ "${1}" == "start" ]; then
+    httpd \
+    -f "${HOME}/OneDrive/System/Configurations/httpd.conf" \
+    -C "Listen ${2}" \
+    -C "ServerName localhost:${2}" \
+    -C "DocumentRoot \"${localPath}\"" \
+    -C "PidFile \"${localPath}/httpd.pid\"" \
+    -C "ErrorLog \"${localPath}/error_log\"" \
+    -C "IncludeOptional \"${localPath}/httpd.con[f]\""
+    echo "Started Apache HTTP Server at localhost:${2}"
+elif [ "${1}" == "stop" ]; then
+    httpd \
+    -f "${HOME}/OneDrive/System/Configurations/httpd.conf" \
+    -C "Listen ${2}" \
+    -C "ServerName localhost:${2}" \
+    -C "DocumentRoot \"${localPath}\"" \
+    -C "PidFile \"${localPath}/httpd.pid\"" \
+    -C "ErrorLog \"${localPath}/error_log\"" \
+    -C "IncludeOptional \"${localPath}/httpd.con[f]\"" \
+    -k stop
+    echo "Stopped Apache HTTP Server at localhost:${2}"
+fi
