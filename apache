@@ -8,7 +8,7 @@
 localPath=`pwd`
 
 if [ "${1}" == "start" ]; then
-    httpd \
+    sudo httpd \
     -f "${HOME}/OneDrive/System/Configurations/httpd.conf" \
     -C "Listen ${2}" \
     -C "ServerName localhost:${2}" \
@@ -18,7 +18,7 @@ if [ "${1}" == "start" ]; then
     -C "IncludeOptional \"${localPath}/httpd.con[f]\""
     echo "Started Apache HTTP Server at localhost:${2}"
 elif [ "${1}" == "stop" ]; then
-    httpd \
+    sudo httpd \
     -f "${HOME}/OneDrive/System/Configurations/httpd.conf" \
     -C "Listen ${2}" \
     -C "ServerName localhost:${2}" \
